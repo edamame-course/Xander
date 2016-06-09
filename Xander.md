@@ -160,7 +160,7 @@ genes -- Genes to assemble (supported out of the box: rplB, nirK, nirS, nifH, no
 
 Now that we understand the paramters a bit more, lets edit our environment. 
 
-```nano run_xander_setenv.sh```
+```nano xander_setenv.sh```
 
 Directories must match the absolute path that we are using. 
 
@@ -180,7 +180,7 @@ Next we select the filter size. This dataset is relatively small (~2MB), so we w
 We also need to change the security of this file so that we can excecute it. 
 
 ```
-chmod 777 run_xander_setenv.sh
+chmod 777 xander_setenv.sh
 ```
 
 Now we are ready to roll!
