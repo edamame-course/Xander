@@ -31,6 +31,21 @@ Fish, J. A., B. Chai, Q. Wang, Y. Sun, C. T. Brown, J. M. Tiedje, and J. R. Cole
 * [HMMER 3.1] (http://hmmer.org) (If using HMMER 3.0 add --allcol to bin/run_xander_skel.sh )
 * UCHIME 
 
+###What is Xander?
+Xander is a gene-targeted metagenome assembler. This means that it takes metagenomic data and assembles it based on your gene(s) of interest only. This can be useful if you have a gene-centric study in mind and metagenomic data. Classic approaches to metagenome assembly tend to assemble the most abundant organisms and can have limited recovery for individual genes. This can be problematic, especially if you are interested in only a handful of genes. 
+
+###How does Xander work?
+Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Xander uses these to guide the de Bruijn graph assembly of metagenomic data. See this [wikipedia page] (https://en.wikipedia.org/wiki/De_Bruijn_graph) for more information on de Bruijn graph assembly. 
+
+(insert figure from xander paper)
+
+As you can see, Xander will require several inputs. Our metagenomic data will be the input for the de Bruijn graph assembly, but we will also need gene references to make the HMM. There are three ways to go about setting up a gene reference. 
+  1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. In this tutorial we will use _rplB_ and do not need to prepare our gene reference. 
+  2. Your gene of interest is on the RDP's FunGene database. This requires a bit of work and biological insight. See bottom of this page for instructions. 
+  3. Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. See bottom of this page for instructions. 
+  
+Now that we have a basic idea of how Xander works and what we need, let's get started!
+
 ###1 Connect to Xander AMI
 For this tutorial, we will use an existing AMI that contains all the necessary tools to run Xander. Search for the AMI name "RDP-Edamame-2015" or ID "ami-e973b782"
 
@@ -39,7 +54,6 @@ Click launch.
 Select instance type: General purpose, m3.large, 7.5G
 
 ###2 Prepare gene reference
-As Xander is a gene-targeted metagenome assembler, the first steps involve preparing a profile hidden Markov model of your gene of interest. This will ultimately be used to guide the assembly. 
 
 The Xander assembler, which is included in the RDPTools, can be accessed and downloaded from the [RDP staff GiHhub] (https://github.com/rdpstaff/RDPTools). Since this is already included in the AMI,  we can skip this download in the tutorial and navigate to the Xander assembler directory.
 
@@ -51,62 +65,31 @@ In the Xander assembler, you should see several directories including ```gene_re
 
 ```gene_resource``` contains reference sequence files and models. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_.
 
-In this tutorial, we will use the preexisting _rplB_ files and models, but we'll briefly go over how to set up this directory. 
+In this tutorial, we will use the preexisting _rplB_ files and models, but we'll still go over what's in this directory. 
 
-For each individual gene of interest, you should make a separate directory in ```gene_resource``` with a subdirectory ```originaldata```. 
+Let's navigate to our gene of interest _rplB_. 
 
-```originaldata``` will hold the four required files for Xander. This step requires biological insight!
+```
+cd 
+```
+
+```originaldata``` holds the four required files for Xander. This step requires biological insight!
 * **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. Can be downloaded from RDP's FunGene database. 
 * **gene.hmm**: this is the HMM built from gene.seeds using original HMMER3. This is used to build for_enone.hmm and align contigs after assembly. Can be downloaded from RDP's FunGene database. 
 * **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Filter with Minimum HMM Coverage at least 80 (%).
 * **nucl.fa**: a large near full length known set used by UCHIME chimera check.
 
-These files can be downloaded from the RDP's FunGene database. In your web browser, open the RDP's FunGene database [http://fungene.cme.msu.edu] (http://fungene.cme.msu.edu). Here you will find a list of gene families based on searches of the NCBI non-redundant protein database using "training sequences" or **gene.seeds**. Select _rplB_ in the Phylogenetic markers heading. 
+These four files were used to make three files that Xander can use, and they are in our gene directory. 
 
-To download the gene.seeds and gene.hmm files, click on the links at the top left of a page. Note this may not work with Safari.
-(add image of fungene with links boxed in red)
+```
+cd ../
+```
 
-To obtain the framebot.fa and nucl.fa files, click on the show/hide filter options link at the top right of the page. Here you can limit the the score, minimum size aa, and minimum HMM coverage. 
-* The score will vary by gene. You may choose to leave this area blank. You can also manually look though the sequences to see if there is a large drop off in score at a specific number and use this number as a cutoff. 
-* The minimum size aa will depend on the actual protein size. You'll want to find a balance between near-full length sequences and diversity. 
-* The minimum HMM coverage must be greater than 80%. What percent cutoff you choose will require biological insight. Lower % HMM coverage will increase diversity but may lower the quality of your search. Once you have set your parameters, click filter. Then you will need to select sequences. It is not recommended to blindly select all sequences. Instead, manually go through and make sure no oddballs are included. For reference, the Xander paper used over 700 near full-length sequences for their .fa files. Once your sequences are selected, click begin analysis at the top right of the page. This will take you to a page where you can download your framebot.fa (protein) and nucl.fa (nucleotide) sequences. Then change the names to framebot.fa and nucl.fa respectively. Move all of these files to ```originaldata```. 
-
-From these files, we need to make three new files
+You should now see three files (and the ```originaldata``` directory): **ref_aligned.faa**, **for_enone.hmm**, and **rev_enone.hmm**
 * **for_enone.hmm** and **rev_enone.hmm** for the forward and reverse HMMs respectively. This is used to assemble gene contigs.
 * **ref_aligned.faa** file containing a set of protein reference sequences aligned with for_enone.hmm. This is used to identify starting kmers. Need to manually examine the alignment using Jalview or alignment viewing tool to spot any badly aligned sequences. If found, it is likely there are no sequences in gene.seeds close these sequences. You need to valide these problem sequences to see they are from the gene you are interested, then either remove them or add some representative sequences to gene.seeds and repeat the prepartion steps.
 
-This can be accomplished using the ```prepare_gene_ref.sh``` script, but first, we need to edit this file. 
-
-```
-cd /home/ubuntu/tools/RDPTools/Xander_assembler/bin
-nano prepare_gene_ref.sh
-```
-
-We need to change this file to reflect our gene of interest and our paths.
-* line 4: change gene to ```rplB```
-* line 9: change the jar directory to ```/home/ubuntu/tools/RDPTools```
-* line 10: change the reference directory to ```/home/ubuntu/tools/RDPTools/Xander_assembler```
-* line 14: change the hmmer xanderpatch location to ```hmmer_xanderpatch=/home/ubuntu/tools/third_party_tools/hmmer-3.0-xanderpatch```
-
-Now save the changes you've made to the shell script. 
-
-Excellent! You now have a script ready to prepare the gene reference for Xander. Let's run it. All you need to do is excecute this script and specify your gene of interest. In our case, this is _rplB_. 
-
-```
-./prepare_gene_ref.sh rplB
-```
-
-Check and see that all of your output files are in your gene directory. 
-
-```
-cd /home/ubuntu/tools/RDPTools/Xander_assembler/gene_resource/rplB
-```
-
-You should now see three new files: **ref_aligned.faa**, **for_enone.hmm**, and **rev_enone.hmm**
-
-Remember that when running Xander on your own gene of interest, you will need to manually check ```ref_aligned.faa``` for any poorly aligned sequences. This can be done using Jalview or another alignment viewing tool. 
-
-Now that we have our gene reference files, we can begin to set up the assembler. 
+Now that we understand our gene reference files, we can begin to set up the assembler. 
 
 ###3 Set up metagenomic data
 
@@ -208,8 +191,8 @@ Note: if you wanted to run multiple genes at once, you would simply list them in
 Xander has a lot of output files, so now we will go over which ones are important for your analysis. First let's check our false positive rate.
 
 ```
-/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
-cat demo_rplB_k45_bloom_stat.txt
+cd /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/k45
+cat k45_bloom_stat.txt
 ```
 
 The false positive rate is at the bottom of this file. The smaller the better!
@@ -217,7 +200,7 @@ The false positive rate is at the bottom of this file. The smaller the better!
 Now that we know our false positive rate, we can examine the results. These files will be in the following directory:
 
 ```
-/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/k45/cluster
+/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/k45/rplB/cluster
 ```
 
 Here you will find the following output files: 
@@ -227,4 +210,73 @@ Here you will find the following output files:
 * ```demo_rplB_k45_final_prot_aligned.fasta```: Aligned protein sequences
 * ```demo_rplB_k45_Taxonabund.txt```: taxonomic abundance adjusted by coverage (```coverage.txt```), grouped by lineage (phylum/class)
 * ```demo_rplB_k45_Framebot.txt```: Alignment of your contig with nearest reference sequence and % identity
+
+
+###Preparing Gene References
+  1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. 
+  2. Your gene of interest is on the RDP's FunGene database. 
+  3. Your gene of interest is not preconfigured or on the FunGene database. 
+
+Below, you will find instructions for each of these scenarios. 
+
+####Scenario 1: 
+The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. See above tutorial. 
+
+####Scenario 2:
+ Your gene of interest is on the RDP's FunGene database. This requires a bit of work and biological insight. 
+For each individual gene of interest, you should make a separate directory in gene_resource with a subdirectory originaldata.
+
+```originaldata``` will hold the four required files for Xander. This step requires biological insight!
+* **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. Can be downloaded from RDP's FunGene database. 
+* **gene.hmm**: this is the HMM built from gene.seeds using original HMMER3. This is used to build for_enone.hmm and align contigs after assembly. Can be downloaded from RDP's FunGene database. 
+* **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Filter with Minimum HMM Coverage at least 80 (%).
+* **nucl.fa**: a large near full length known set used by UCHIME chimera check.
+
+These files can be downloaded from the RDP's FunGene database. In your web browser, open the RDP's FunGene database [http://fungene.cme.msu.edu] (http://fungene.cme.msu.edu). Here you will find a list of gene families based on searches of the NCBI non-redundant protein database using "training sequences" or **gene.seeds**. Select _rplB_ in the Phylogenetic markers heading. 
+
+To download the gene.seeds and gene.hmm files, click on the links at the top left of a page. Note this may not work with Safari.
+(add image of fungene with links boxed in red)
+
+To obtain the framebot.fa and nucl.fa files, click on the show/hide filter options link at the top right of the page. Here you can limit the the score, minimum size aa, and minimum HMM coverage. 
+* The score will vary by gene. You may choose to leave this area blank. You can also manually look though the sequences to see if there is a large drop off in score at a specific number and use this number as a cutoff. 
+* The minimum size aa will depend on the actual protein size. You'll want to find a balance between near-full length sequences and diversity. 
+* The minimum HMM coverage must be greater than 80%. What percent cutoff you choose will require biological insight. Lower % HMM coverage will increase diversity but may lower the quality of your search. Once you have set your parameters, click filter. Then you will need to select sequences. It is not recommended to blindly select all sequences. Instead, manually go through and make sure no oddballs are included. For reference, the Xander paper used over 700 near full-length sequences for their .fa files. Once your sequences are selected, click begin analysis at the top right of the page. This will take you to a page where you can download your framebot.fa (protein) and nucl.fa (nucleotide) sequences. Then change the names to framebot.fa and nucl.fa respectively. Move all of these files to ```originaldata```. 
+
+From these files, we need to make three new files
+* **for_enone.hmm** and **rev_enone.hmm** for the forward and reverse HMMs respectively. This is used to assemble gene contigs.
+* **ref_aligned.faa** file containing a set of protein reference sequences aligned with for_enone.hmm. This is used to identify starting kmers. Need to manually examine the alignment using Jalview or alignment viewing tool to spot any badly aligned sequences. If found, it is likely there are no sequences in gene.seeds close these sequences. You need to valide these problem sequences to see they are from the gene you are interested, then either remove them or add some representative sequences to gene.seeds and repeat the prepartion steps.
+
+This can be accomplished using the ```prepare_gene_ref.sh``` script, but first, we need to edit this file. 
+
+```
+cd /home/ubuntu/tools/RDPTools/Xander_assembler/bin
+nano prepare_gene_ref.sh
+```
+
+We need to change this file to reflect our gene of interest and our paths.
+* line 4: change gene to your gene of interest
+* line 9: change the jar directory to ```/home/ubuntu/tools/RDPTools```
+* line 10: change the reference directory to ```/home/ubuntu/tools/RDPTools/Xander_assembler```
+* line 14: change the hmmer xanderpatch location to ```hmmer_xanderpatch=/home/ubuntu/tools/third_party_tools/hmmer-3.0-xanderpatch```
+
+Now save the changes you've made to the shell script. 
+
+Excellent! You now have a script ready to prepare the gene reference for Xander. Let's run it. All you need to do is excecute this script and specify your gene of interest. 
+
+```
+./prepare_gene_ref.sh rplB
+```
+
+Check and see that all of your output files are in your gene directory. 
+
+```
+cd /home/ubuntu/tools/RDPTools/Xander_assembler/gene_resource/rplB
+```
+
+You should now see three new files: **ref_aligned.faa**, **for_enone.hmm**, and **rev_enone.hmm**
+
+Remember that when running Xander on your own gene of interest, you will need to manually check ```ref_aligned.faa``` for any poorly aligned sequences. This can be done using Jalview or another alignment viewing tool. 
+
+####Scenario 3: 
+Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. 
 
