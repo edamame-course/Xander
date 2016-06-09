@@ -163,7 +163,7 @@ Now that we understand the paramters a bit more, lets edit our environment.
 
 ```nano xander_setenv.sh```
 
-Directories must match the absolute path that we are using. 
+Directories must match the absolute path that we are using, and we need to name our sample (sample shortname). The sample shortname will be the beginning of every results file.  
 
 ```
 SEQFILE=/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/demo_reads.fa
@@ -172,6 +172,9 @@ REF_DIR=/home/ubuntu/tools/RDPTools/Xander_assembler
 JAR_DIR=/home/ubuntu/tools/RDPTools
 UCHIME=/home/ubuntu/tools/third_party_tools/uchime4.2.40_i86linux32
 HMMALIGN=/usr/local/bin/hmmalign
+
+## THIS SECTION NEED TO BE MODIFIED, SAMPLE_SHORTNAME WILL BE THE PREFIX OF CONTIG ID
+SAMPLE_SHORTNAME=demo
 ```
 
 Now we want to select our kmer size. For this experiment, we will use ```45```, but numbers divisible by three between 45 and 63 are permissible. Higher numbers will yield more stringent results. 
@@ -192,3 +195,36 @@ To run Xander, we use one simple command. Note that if you want to run multiple 
 ```
 ./run_xander_skel.sh xander_setenv.sh “build find search” “rplB”
 ```
+
+This should take about 15-20 minutes to run with this dataset. It will take much longer (a couple of hours) with larger datasets.  
+
+Note: if you wanted to run multiple genes at once, you would simply list them in quotations as done below. 
+
+```
+./run_xander_skel.sh xander_setenv.sh “build find search” “rplB nirK nirS”
+```
+
+###5 Analyze results
+Xander has a lot of output files, so now we will go over which ones are important for your analysis. First let's check our false positive rate.
+
+```
+/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
+cat demo_rplB_k45_bloom_stat.txt
+```
+
+The false positive rate is at the bottom of this file. The smaller the better!
+
+Now that we know our false positive rate, we can examine the results. These files will be in the following directory:
+
+```
+/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/k45/cluster
+```
+
+Here you will find the following output files: 
+
+* ```demo_rplB_k45_final_nucl.fasta```: Quality filtered nucleotide sequences (representative) 
+* ```demo_rplB_k45_final_prot.fasta```: Quality filtered protein sequences and abundance (number of contigs)
+* ```demo_rplB_k45_final_prot_aligned.fasta```: Aligned protein sequences
+* ```demo_rplB_k45_Taxonabund.txt```: taxonomic abundance adjusted by coverage (```coverage.txt```), grouped by lineage (phylum/class)
+* ```demo_rplB_k45_Framebot.txt```: Alignment of your contig with nearest reference sequence and % identity
+
