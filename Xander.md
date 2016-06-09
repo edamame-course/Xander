@@ -139,16 +139,16 @@ cp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/run_xander_skel.sh /home/ubu
 
 We need to change ```xander_setenv.sh``` to reflect our directories and gene of interest. This is also where we can adjust Xander parameters. First let's think about our parameter options. 
 
-####Analysis Parameters
-* _SEQFILE_ -- Absolute path to the sequence files. Can use wildcards to point to multiple files (fasta, fataq or gz format)
-* _genes_ -- Genes to assemble (supported out of the box: rplB, nirK, nirS, nifH, nosZ, amoA)
-* _SAMPLE SHORTNAME_ -- a short name for your sample, prefix of contig IDs (needed when pool contigs from multiple samples)
+######Analysis Parameters
+* __SEQFILE__ -- Absolute path to the sequence files. Can use wildcards to point to multiple files (fasta, fataq or gz format)
+* __genes__ -- Genes to assemble (supported out of the box: rplB, nirK, nirS, nifH, nosZ, amoA)
+* __SAMPLE SHORTNAME__ -- a short name for your sample, prefix of contig IDs (needed when pool contigs from multiple samples)
 
-####DBG Parameters
-* _MAX JVM HEAP_ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE below)
-* _K SIZE_ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63)
-* _FILTER SIZE_ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. Multiply by 2 if you want a count 2 bloom filter. Increase filter size if false positive rate >1%. 
-* _MIN COUNT_=1 -- minimum kmer occurrence in SEQFILE to be included in the final bloom filter
+######DBG Parameters
+* __MAX JVM HEAP__ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE below)
+* __K SIZE__ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63)
+* __FILTER SIZE__ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. Multiply by 2 if you want a count 2 bloom filter. Increase filter size if false positive rate >1%. 
+* __MIN COUNT__=1 -- minimum kmer occurrence in SEQFILE to be included in the final bloom filter
 
 Descriptions of other parameters can be found in the RDP's [Xander README] (https://github.com/rdpstaff/Xander_assembler) and in greater detail in the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
 
