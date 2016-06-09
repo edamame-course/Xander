@@ -68,6 +68,7 @@ The Xander assembler, which is included in the RDPTools, can be accessed and dow
 
 ```
 cd /home/ubuntu/tools/RDPTools/Xander_assembler
+ls
 ```
 
 In the Xander assembler, you should see several directories including ```gene_resource```. If you navigate to this directory, you will see a list of genes that have pre-made hidden Markov models that can be used for assembly of your metagenome. We will now go through how to make your own profile hidden Markov model in case your gene of interest is not pre-processed. 
@@ -76,10 +77,11 @@ In the Xander assembler, you should see several directories including ```gene_re
 
 In this tutorial, we will use the preexisting _rplB_ files and models, but we'll still go over what's in this directory. 
 
-Let's navigate to our gene of interest _rplB_. 
+Let's navigate to the input data for our gene of interest _rplB_. 
 
 ```
-cd /home/ubuntu/tools/RDPTools/Xander_assembler/gene_resource/rplB
+cd ~/tools/RDPTools/Xander_assembler/gene_resource/rplB/originaldata
+ls
 ```
 
 The ```originaldata``` directory holds the four required files for Xander. 
@@ -91,7 +93,8 @@ The ```originaldata``` directory holds the four required files for Xander.
 These four files were used to make our HMMs, and they are already in our gene directory. (See bottom of page for information on how to make these files)
 
 ```
-cd ../
+cd ..
+ls
 ```
 
 You should now see three files (and the ```originaldata``` directory): **ref_aligned.faa**, **for_enone.hmm**, and **rev_enone.hmm**
@@ -111,8 +114,17 @@ Let's navigate to the ```Xander_assembler``` directory, make a new directory in 
 ```
 cd /home/ubuntu/tools/RDPTools/Xander_assembler
 mkdir rplB_demo
-scp /home/ubuntu/demo/data/demo_reads.fa /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
+cp /home/ubuntu/demo/data/demo_reads.fa /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
 ```
+
+Check that the file was moved to the right location. 
+
+```
+cd ~/tools/RDPTools/Xander_assembler/rplB_demo
+ls
+```
+
+You should see the demo_reads.fa file there. 
 
 Now we're ready to adjust paramters for analysis!
 
@@ -121,8 +133,8 @@ Now we're ready to adjust paramters for analysis!
 We will need to edit one shell script to run Xander. You may want to keep the original file for future reference, so we will copy it to into ```rplB_demo``` instead of editing them directly. 
 
 ```
-scp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/xander_setenv.sh /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
-scp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/run_xander_skel.sh /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
+cp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/xander_setenv.sh /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
+cp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/run_xander_skel.sh /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
 ```
 
 We need to change ```xander_setenv.sh``` to reflect our directories and gene of interest. This is also where we can adjust Xander parameters. First let's think about our parameter options. 
@@ -135,18 +147,11 @@ We need to change ```xander_setenv.sh``` to reflect our directories and gene of 
 ####DBG Parameters
 * _MAX JVM HEAP_ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE below)
 * _K SIZE_ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63)
-* _FILTER SIZE_ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. multiply by 2 if you want a count 2 bloom filter
-* _FILTER SIZE_ if the bloom filter predicted false positive rate is greater than 1%
+* _FILTER SIZE_ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. Multiply by 2 if you want a count 2 bloom filter. Increase filter size if false positive rate >1%. 
 * _MIN COUNT_=1 -- minimum kmer occurrence in SEQFILE to be included in the final bloom filter
 
-####Contig Search Parameters
-* _PRUNE=20_ -- prune the search if the score does not improve after n_nodes (default 20, set to 0 to disable pruning)
-* _PATHS=1_ -- number of paths to search for each starting kmer, default 1 returns the shortest path
-* _LIMIT IN SECS_=100 -- number of seconds a search allowed for each kmer, recommend 100 secs for 1 shortest path, need to increase if PATHS is large
+Descriptions of other parameters can be found in the RDP's [Xander README] (https://github.com/rdpstaff/Xander_assembler) and in greater detail in the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
 
-####Contig Merge Parameters
-* _MIN BITS_=50 --mimimum assembled contigs bit score
-* _MIN LENGTH_=150 -- minimum assembled protein contigs
 
 Now that we understand the paramters a bit more, lets edit our environment. 
 
@@ -157,6 +162,8 @@ nano xander_setenv.sh
 
 Directories must match the absolute path that we are using, and we need to name our sample (sample shortname). The sample shortname will be the beginning of every results file.  
 
+Delete lines 14-19 and paste in the following.
+
 ```
 SEQFILE=/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/demo_reads.fa
 WORKDIR=/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
@@ -164,14 +171,15 @@ REF_DIR=/home/ubuntu/tools/RDPTools/Xander_assembler
 JAR_DIR=/home/ubuntu/tools/RDPTools
 UCHIME=/home/ubuntu/tools/third_party_tools/uchime4.2.40_i86linux32
 HMMALIGN=/usr/local/bin/hmmalign
-
-## THIS SECTION NEED TO BE MODIFIED, SAMPLE_SHORTNAME WILL BE THE PREFIX OF CONTIG ID
-SAMPLE_SHORTNAME=demo
 ```
 
-Now we want to select our kmer size. For this experiment, we will use ```45```, but numbers divisible by three between 45 and 63 are permissible. Higher numbers will yield more stringent results. 
+Line 22: replace ```test``` with ```demo```.
 
-Next we select the filter size. This dataset is relatively small (~2MB), so we will specify ```32```. 
+Line 26: select kmer size. For this experiment, we will use ```45```, but numbers divisible by three between 45 and 63 are permissible. Higher numbers will yield more stringent results. 
+
+Line 29: choose minimum kmer abundance. we will set this to ```1```. 
+
+Save changes to this file and exit, and remember that you can adjust other parameters as well. 
 
 We also need to change the security of this file so that we can excecute it. 
 
@@ -185,7 +193,7 @@ Now we are ready to roll!
 To run Xander, we use one simple command. Note that if you want to run multiple genes at once, simply say all of them in the command instead of one.
 
 ```
-./run_xander_skel.sh xander_setenv.sh “build find search” “rplB”
+./run_xander_skel.sh xander_setenv.sh "build find search" "rplB"
 ```
 
 This should take about 15-20 minutes to run with this dataset. It will take much longer (a couple of hours) with larger datasets.  
@@ -204,7 +212,7 @@ cd /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/k45
 cat k45_bloom_stat.txt
 ```
 
-The false positive rate is at the bottom of this file. This must be smaller than 1%.
+The false positive rate is at the bottom of this file. This must be smaller than 1%. If it is larger than 1%, you should increase the filter size in ```xander_setenv.sh```. 
 
 Now that we know our false positive rate, we can examine the results. These files will be in the following directory:
 
