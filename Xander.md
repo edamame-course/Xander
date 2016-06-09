@@ -36,6 +36,7 @@ For this tutorial, we will use an existing AMI that contains all the necessary t
 
 Click launch.
 
+Select instance type: General purpose, m3.large, 7.5G
 
 ###2 Prepare gene reference
 As Xander is a gene-targeted metagenome assembler, the first steps involve preparing a profile hidden Markov model of your gene of interest. This will ultimately be used to guide the assembly. 
