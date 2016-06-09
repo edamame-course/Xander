@@ -32,18 +32,27 @@ Fish, J. A., B. Chai, Q. Wang, Y. Sun, C. T. Brown, J. M. Tiedje, and J. R. Cole
 * UCHIME 
 
 ###What is Xander?
-Xander is a gene-targeted metagenome assembler. This means that it takes metagenomic data and assembles it based on your gene(s) of interest only. This can be useful if you have a gene-centric study in mind and metagenomic data. Classic approaches to metagenome assembly tend to assemble the most abundant organisms and can have limited recovery for individual genes. This can be problematic, especially if you are interested in only a handful of genes. 
+Xander is a gene-targeted metagenome assembler. This means that it takes metagenomic data and assembles it based on your gene(s) of interest only. This can be useful if you have a gene-centric study in mind and metagenomic data. Classic approaches to metagenome assembly tend to assemble the most abundant organisms and can have more limited recovery for individual genes. This can be problematic, especially if you are interested in only a handful of specific genes. 
 
 ###How does Xander work?
 Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Xander uses these to guide the de Bruijn graph assembly of metagenomic data. See this [wikipedia page] (https://en.wikipedia.org/wiki/De_Bruijn_graph) for more information on de Bruijn graph assembly. 
 
 (insert figure from xander paper)
 
+
 As you can see, Xander will require several inputs. Our metagenomic data will be the input for the de Bruijn graph assembly, but we will also need gene references to make the HMM. There are three ways to go about setting up a gene reference. 
-  1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. In this tutorial we will use _rplB_ and do not need to prepare our gene reference. 
+  1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. *In this tutorial we will use _rplB_ and do not need to prepare our gene reference.*
   2. Your gene of interest is on the RDP's FunGene database. This requires a bit of work and biological insight. See bottom of this page for instructions. 
   3. Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. See bottom of this page for instructions. 
   
+Overall, running Xander has three steps: _Build_, _Find_, and _Search_
+
+1. _Build_: Make a de Bruijn graph (one per sequence sample) at a specified kmer length. Uses a bloom filter to reduce memory usage. See the [wikipedia page] (https://en.wikipedia.org/wiki/Bloom_filter) for more information on bloom filters. 
+2. _Find_: Find starting kmers for the genes using aligned reference sequences (has multithread option that allows you to find starting kmers for multiple genes at once). 
+3. _Search_: Assemble contigs for your gene(s) of interest
+
+For more detail on these steps, check out the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6)!
+
 Now that we have a basic idea of how Xander works and what we need, let's get started!
 
 ###1 Connect to Xander AMI
@@ -70,16 +79,16 @@ In this tutorial, we will use the preexisting _rplB_ files and models, but we'll
 Let's navigate to our gene of interest _rplB_. 
 
 ```
-cd 
+cd /home/ubuntu/tools/RDPTools/Xander_assembler/gene_resource/rplB
 ```
 
-```originaldata``` holds the four required files for Xander. This step requires biological insight!
-* **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. Can be downloaded from RDP's FunGene database. 
-* **gene.hmm**: this is the HMM built from gene.seeds using original HMMER3. This is used to build for_enone.hmm and align contigs after assembly. Can be downloaded from RDP's FunGene database. 
+The ```originaldata``` directory holds the four required files for Xander. 
+* **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. 
+* **gene.hmm**: this is the HMM built from gene.seeds using original HMMER3. This is used to build for_enone.hmm and align contigs after assembly. 
 * **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Filter with Minimum HMM Coverage at least 80 (%).
 * **nucl.fa**: a large near full length known set used by UCHIME chimera check.
 
-These four files were used to make three files that Xander can use, and they are in our gene directory. 
+These four files were used to make our HMMs, and they are already in our gene directory. (See bottom of page for information on how to make these files)
 
 ```
 cd ../
@@ -118,33 +127,33 @@ scp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/run_xander_skel.sh /home/ub
 
 We need to change ```xander_setenv.sh``` to reflect our directories and gene of interest. This is also where we can adjust Xander parameters. First let's think about our parameter options. 
 
-####How to choose the FILTER_SIZE for your dataset?
-For count 1 bloom, the size of the bloom filter is approximately 2^(FILTER_SIZE-3) bytes. The memory needed for Java is less than double the size of the bloom filter. Increase the FILTER_SIZE if the predicted false positive rate (in output file *_bloom_stat.txt) is greater than 1%. Based on our experience with soil metagenome data, FILTER_SIZE 32 (1 GB memory) for data file size of 2GB, 35 (8 GB) for file size of 6GB, 38 (64 GB ) for file size of 70GB, 40 (256 GB) for file size of 350GB were appropriate. For count 2 bloom filter, double the memory sizes.
-
 ####Analysis Parameters
-* SEQFILE -- Absolute path to the sequence files. Can use wildcards to point to multiple files (fasta, fataq or gz format)
-genes -- Genes to assemble (supported out of the box: rplB, nirK, nirS, nifH, nosZ, amoA)
-* SAMPLE_SHORTNAME -- a short name for your sample, prefix of contig IDs (needed when pool contigs from multiple samples)
+* _SEQFILE_ -- Absolute path to the sequence files. Can use wildcards to point to multiple files (fasta, fataq or gz format)
+* _genes_ -- Genes to assemble (supported out of the box: rplB, nirK, nirS, nifH, nosZ, amoA)
+* _SAMPLE SHORTNAME_ -- a short name for your sample, prefix of contig IDs (needed when pool contigs from multiple samples)
 
 ####DBG Parameters
-* MAX JVM HEAP -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE below)
-* K_SIZE -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63)
-* FILTER SIZE -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB, increase 
-* FILTER_SIZE if the bloom filter predicted false positive rate is greater than 1%
-* MIN_COUNT=1 -- minimum kmer occurrence in SEQFILE to be included in the final bloom filter
+* _MAX JVM HEAP_ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE below)
+* _K SIZE_ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63)
+* _FILTER SIZE_ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. multiply by 2 if you want a count 2 bloom filter
+* _FILTER SIZE_ if the bloom filter predicted false positive rate is greater than 1%
+* _MIN COUNT_=1 -- minimum kmer occurrence in SEQFILE to be included in the final bloom filter
 
 ####Contig Search Parameters
-* PRUNE=20 -- prune the search if the score does not improve after n_nodes (default 20, set to 0 to disable pruning)
-* PATHS=1 -- number of paths to search for each starting kmer, default 1 returns the shortest path
-* LIMIT IN SECS=100 -- number of seconds a search allowed for each kmer, recommend 100 secs for 1 shortest path, need to increase if PATHS is large
+* _PRUNE=20_ -- prune the search if the score does not improve after n_nodes (default 20, set to 0 to disable pruning)
+* _PATHS=1_ -- number of paths to search for each starting kmer, default 1 returns the shortest path
+* _LIMIT IN SECS_=100 -- number of seconds a search allowed for each kmer, recommend 100 secs for 1 shortest path, need to increase if PATHS is large
 
 ####Contig Merge Parameters
-* MIN BITS=50 --mimimum assembled contigs bit score
-* MIN LENGTH=150 -- minimum assembled protein contigs
+* _MIN BITS_=50 --mimimum assembled contigs bit score
+* _MIN LENGTH_=150 -- minimum assembled protein contigs
 
 Now that we understand the paramters a bit more, lets edit our environment. 
 
-```nano xander_setenv.sh```
+```
+cd /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
+nano xander_setenv.sh
+```
 
 Directories must match the absolute path that we are using, and we need to name our sample (sample shortname). The sample shortname will be the beginning of every results file.  
 
@@ -167,7 +176,7 @@ Next we select the filter size. This dataset is relatively small (~2MB), so we w
 We also need to change the security of this file so that we can excecute it. 
 
 ```
-chmod 777 xander_setenv.sh
+chmod 755 xander_setenv.sh
 ```
 
 Now we are ready to roll!
@@ -195,7 +204,7 @@ cd /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/k45
 cat k45_bloom_stat.txt
 ```
 
-The false positive rate is at the bottom of this file. The smaller the better!
+The false positive rate is at the bottom of this file. This must be smaller than 1%.
 
 Now that we know our false positive rate, we can examine the results. These files will be in the following directory:
 
@@ -224,7 +233,7 @@ The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene,
 
 ####Scenario 2:
  Your gene of interest is on the RDP's FunGene database. This requires a bit of work and biological insight. 
-For each individual gene of interest, you should make a separate directory in gene_resource with a subdirectory originaldata.
+For each individual gene of interest, ```mkdir genename```, navigate to this gene directory, and ```mkdir originaldata```. 
 
 ```originaldata``` will hold the four required files for Xander. This step requires biological insight!
 * **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. Can be downloaded from RDP's FunGene database. 
@@ -232,7 +241,7 @@ For each individual gene of interest, you should make a separate directory in ge
 * **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Filter with Minimum HMM Coverage at least 80 (%).
 * **nucl.fa**: a large near full length known set used by UCHIME chimera check.
 
-These files can be downloaded from the RDP's FunGene database. In your web browser, open the RDP's FunGene database [http://fungene.cme.msu.edu] (http://fungene.cme.msu.edu). Here you will find a list of gene families based on searches of the NCBI non-redundant protein database using "training sequences" or **gene.seeds**. Select _rplB_ in the Phylogenetic markers heading. 
+In your web browser, download files from the [RDP's FunGene database] (http://fungene.cme.msu.edu). Here you will find a list of gene families based on searches of the NCBI non-redundant protein database using "training sequences" or **gene.seeds**. Select _rplB_ in the Phylogenetic markers heading. 
 
 To download the gene.seeds and gene.hmm files, click on the links at the top left of a page. Note this may not work with Safari.
 (add image of fungene with links boxed in red)
@@ -253,11 +262,11 @@ cd /home/ubuntu/tools/RDPTools/Xander_assembler/bin
 nano prepare_gene_ref.sh
 ```
 
-We need to change this file to reflect our gene of interest and our paths.
+We need to change this file to reflect our gene of interest and our paths. The paths in this initial script are generalized from the RDP, but we want them to be specific to our AMI. 
 * line 4: change gene to your gene of interest
 * line 9: change the jar directory to ```/home/ubuntu/tools/RDPTools```
 * line 10: change the reference directory to ```/home/ubuntu/tools/RDPTools/Xander_assembler```
-* line 14: change the hmmer xanderpatch location to ```hmmer_xanderpatch=/home/ubuntu/tools/third_party_tools/hmmer-3.0-xanderpatch```
+* line 13: change the hmmer xanderpatch location to ```hmmer_xanderpatch=/home/ubuntu/tools/third_party_tools/hmmer-3.0-xanderpatch```
 
 Now save the changes you've made to the shell script. 
 
