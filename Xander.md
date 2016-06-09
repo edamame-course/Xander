@@ -47,9 +47,9 @@ As you can see, Xander will require several inputs. Our metagenomic data will be
   
 Overall, running Xander has three steps: _Build_, _Find_, and _Search_
 
-1. _Build_: Make a de Bruijn graph (one per sequence sample) at a specified kmer length. Uses a bloom filter to reduce memory usage. See the [wikipedia page] (https://en.wikipedia.org/wiki/Bloom_filter) for more information on bloom filters. 
-2. _Find_: Find starting kmers for the genes using aligned reference sequences (has multithread option that allows you to find starting kmers for multiple genes at once). 
-3. _Search_: Assemble contigs for your gene(s) of interest
+1. __Build__: Make a de Bruijn graph (one per sequence sample) at a specified kmer length. Uses a bloom filter to reduce memory usage. See the [wikipedia page] (https://en.wikipedia.org/wiki/Bloom_filter) for more information on bloom filters. 
+2. __Find__: Find starting kmers for the genes using aligned reference sequences (has multithread option that allows you to find starting kmers for multiple genes at once). 
+3. __Search__: Assemble contigs for your gene(s) of interest
 
 For more detail on these steps, check out the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6)!
 
@@ -228,7 +228,7 @@ Here you will find the following output files:
 * ```demo_rplB_k45_Taxonabund.txt```: taxonomic abundance adjusted by coverage (```coverage.txt```), grouped by lineage (phylum/class)
 * ```demo_rplB_k45_Framebot.txt```: Alignment of your contig with nearest reference sequence and % identity
 
-
+-------
 ###Preparing Gene References
   1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. 
   2. Your gene of interest is on the RDP's FunGene database. 
