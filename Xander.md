@@ -37,8 +37,8 @@ Xander is a gene-targeted metagenome assembler. This means that it takes metagen
 ###How does Xander work?
 Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Xander uses these to guide the de Bruijn graph assembly of metagenomic data. See this [wikipedia page] (https://en.wikipedia.org/wiki/De_Bruijn_graph) for more information on de Bruijn graph assembly. 
 
-(insert figure from xander paper)
-![Structure](/Xander/Xander_structure.png)
+The following figure is from the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6) and is a good overview of how a gene-targeted metagenome assembly works. 
+![Structure](https://github.com/edamame-course/Xander/blob/master/Xander_structure.png)
 
 As you can see, Xander will require several inputs. Our metagenomic data will be the input for the de Bruijn graph assembly, but we will also need gene references to make the HMM. There are three ways to go about setting up a gene reference. 
   1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. *In this tutorial we will use _rplB_ and do not need to prepare our gene reference.*
