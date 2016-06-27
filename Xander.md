@@ -14,7 +14,7 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 ##Learning Objectives
 * Prepare gene references for assembly
 * Understand Xander assembly parameters 
-* Assemble megatenome based on specified gene
+* Assemble one gene from a megatenome
 * Examine the abundance and diversity of genes of interest from metagenome data
 
 ---
@@ -32,10 +32,10 @@ Fish, J. A., B. Chai, Q. Wang, Y. Sun, C. T. Brown, J. M. Tiedje, and J. R. Cole
 * UCHIME 
 
 ###What is Xander?
-Xander is a gene-targeted metagenome assembler. This means that it takes metagenomic data and assembles it based on your gene(s) of interest only. This can be useful if you have a gene-centric study in mind and metagenomic data. Classic approaches to metagenome assembly tend to assemble the most abundant organisms and can have more limited recovery for individual genes. This can be problematic, especially if you are interested in only a handful of specific genes. 
+Xander is a gene-targeted metagenome assembler. This means that it takes metagenomic data and assembles it based on your gene(s) of interest only. This can be useful if you have metagenomic data and a gene-centric study in mind. Classic approaches to metagenome assembly tend to assemble the most abundant organisms and can have more limited recovery for individual genes. This can be problematic, especially if you are interested in only a handful of specific genes. Xander avoids this problem by guiding the assembly based on your gene of interest. 
 
 ###How does Xander work?
-Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Xander uses these to guide the de Bruijn graph assembly of metagenomic data. See this [wikipedia page] (https://en.wikipedia.org/wiki/De_Bruijn_graph) for more information on de Bruijn graph assembly. 
+Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Basically these models say how likely a specific sequence is to have come from a known sequence. Xander uses these to guide the assembly of metagenomic data, so you only end up with assembled contigs that resemble your gene of interest.
 
 The following figure is from the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6) and is a good overview of how a gene-targeted metagenome assembly works. 
 ![Structure](https://github.com/edamame-course/Xander/blob/master/Xander_structure.png)
@@ -84,13 +84,15 @@ cd ~/tools/RDPTools/Xander_assembler/gene_resource/rplB/originaldata
 ls
 ```
 
-The ```originaldata``` directory holds the four required files for Xander. 
-* **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. 
-* **gene.hmm**: this is the HMM built from gene.seeds using original HMMER3. This is used to build for_enone.hmm and align contigs after assembly. 
-* **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Filter with Minimum HMM Coverage at least 80 (%).
-* **nucl.fa**: a large near full length known set used by UCHIME chimera check.
+The ```originaldata``` directory holds the four required files for Xander: gene.seeds, gene.hmm, framebot.fa, and nucl.fa. 
 
-These four files were used to make our HMMs, and they are already in our gene directory. (See bottom of page for information on how to make these files)
+You should have all of these in your directory, but we'll go over how you can get these files from the [RDP's FunGene database] (http://fungene.cme.msu.edu). You can select any gene you want for now on the home page. 
+* **gene.seeds**: a small set of **full length, high quality** protein sequences in FASTA format, used to build gene.hmm, forward and reverse HMMs. These sequences are used to make FunGene databases, so if your gene of interest is in FunGene, you can download them there. If not, you would need to find high quality sequences on your own (ideally from papers with protein crystal structures) and send them to RDP to make a FunGene database. Select your gene of interest, and then select "download seeds" 
+* **gene.hmm**: this is the HMM built from gene.seeds using original HMMER3. This is used to build for_enone.hmm and align contigs after assembly. You can also download this from FunGene. Select your gene of interest, and then select "download HMM"
+* **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. You can also download these from FunGne, but you will need to select which sequences you want. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Select "show/hide filter options" and filter with Minimum HMM Coverage at least 80 (%). You can also filter based on number of amino acids and score (both will change depending on the gene of interest). Then click "Begin Analysis" and download the protien sequences. 
+* **nucl.fa**: a large near full length known set used by UCHIME chimera check. Can be downloaded from FunGene using the same sequences used for framebot.fa. Clicl "Begin Analysis" and select "nucleotide download" before downloading.
+
+These four files were used to make our HMMs, and they are already in our gene directory.
 
 ```
 cd ..
@@ -105,7 +107,7 @@ Now that we understand our gene reference files, we can begin to set up the asse
 
 ###3 Set up metagenomic data
 
-Since you may want to run Xander multiple times, it can be useful to make a directory for each project that includes the gene and dataset used. We will do this now. 
+Since you may want to run Xander multiple times, it can be useful to make a directory for each project that includes the gene name and dataset used. We will do this now. 
 
 In our case, we will use data provided by the creators of Xander. This demo_reads file here contains a subset of reads from one of seven corn rhizosphere replicates used in the original Xander publication. This subset is enriched in reads matching rplB, nirK and nifH genes. **These paired-end reads have already been quality trimmed and merged using RDP's read assembler**.
 
@@ -190,7 +192,7 @@ chmod 755 xander_setenv.sh
 Now we are ready to roll!
 
 ###4 Run Xander
-To run Xander, we use one simple command. Note that if you want to run multiple genes at once, simply say all of them in the command instead of one.
+To run Xander, we use one simple command.
 
 ```
 ./run_xander_skel.sh xander_setenv.sh "build find search" "rplB"
@@ -229,6 +231,7 @@ Here you will find the following output files:
 * ```demo_rplB_k45_Framebot.txt```: Alignment of your contig with nearest reference sequence and % identity
 
 -------
+-------
 ###Preparing Gene References
   1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. 
   2. Your gene of interest is on the RDP's FunGene database. 
@@ -249,7 +252,7 @@ For each individual gene of interest, ```mkdir genename```, navigate to this gen
 * **framebot.fa**: a large near full length known protein set for identifying start kmers and FrameBot nearest matching. More diversity is better, more sequences means more starting points (more computational time) but less susceptible to noise than model creation. Prefer near full-length and well-annotated sequences. Filter with Minimum HMM Coverage at least 80 (%).
 * **nucl.fa**: a large near full length known set used by UCHIME chimera check.
 
-In your web browser, download files from the [RDP's FunGene database] (http://fungene.cme.msu.edu). Here you will find a list of gene families based on searches of the NCBI non-redundant protein database using "training sequences" or **gene.seeds**. Select _rplB_ in the Phylogenetic markers heading. 
+In your web browser, download files from the [RDP's FunGene database] (http://fungene.cme.msu.edu). Here you will find a list of gene families based on searches of the NCBI non-redundant protein database using "training sequences" or **gene.seeds**.
 
 To download the gene.seeds and gene.hmm files, click on the links at the top left of a page. Note this may not work with Safari.
 (add image of fungene with links boxed in red)
@@ -297,3 +300,4 @@ Remember that when running Xander on your own gene of interest, you will need to
 ####Scenario 3: 
 Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. 
 
+You need to look through existing literature/ protein databases to find high quality sequences on your own (ideally from papers with protein crystal structures) and send them to RDP to make a FunGene database.
