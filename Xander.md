@@ -37,6 +37,10 @@ Xander is a gene-targeted metagenome assembler. This means that it takes metagen
 ###How does Xander work?
 Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Basically these models say how likely a specific sequence is to have come from a known sequence. Xander uses these to guide the assembly of metagenomic data, so you only end up with assembled contigs that resemble your gene of interest.
 
+###What does Xander require?
+1. High quality data file. Sequencing depth will greatly effect the quality of Xander results. It is important to have deep sequencing, especially for low abundance genes in order to get quality, near full length proteins. The theory of "garbage in, garbage out" also applies to Xander. Input data should already be quality filtered. 
+2. Biological insight on your gene of interest. Because Xander uses existing knowledge of your gene of interest for the assembly, it is best to run well characterized genes especially proteins with crystal structures. 
+
 The following figure is from the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6) and is a good overview of how a gene-targeted metagenome assembly works. 
 ![Structure](https://github.com/edamame-course/Xander/blob/master/Xander_structure.png)
 
@@ -105,13 +109,12 @@ You should now see three files (and the ```originaldata``` directory): **ref_ali
 
 Now that we understand our gene reference files, we can begin to set up the assembler. 
 
-###3 Set up metagenomic data
-
+##3 Set up environment and parameters
 Since you may want to run Xander multiple times, it can be useful to make a directory for each project that includes the gene name and dataset used. We will do this now. 
 
 In our case, we will use data provided by the creators of Xander. This demo_reads file here contains a subset of reads from one of seven corn rhizosphere replicates used in the original Xander publication. This subset is enriched in reads matching rplB, nirK and nifH genes. **These paired-end reads have already been quality trimmed and merged using RDP's read assembler**.
 
-Let's navigate to the ```Xander_assembler``` directory, make a new directory in Xander assembler, and then move the practice data there. 
+Let's navigate to the ```Xander_assembler``` directory and make a new directory in Xander assembler for this analysis.
 
 ```
 cd /home/ubuntu/tools/RDPTools/Xander_assembler
@@ -120,7 +123,6 @@ mkdir rplB_demo
 
 Now we're ready to adjust paramters for analysis!
 
-##4 Set up environmental variables
 
 We will need to edit one shell script to run Xander. You may want to keep the original file for future reference, so we will copy it to into ```rplB_demo``` instead of editing them directly. 
 
