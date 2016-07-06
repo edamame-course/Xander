@@ -75,7 +75,7 @@ In the Xander assembler, you should see several directories including ```gene_re
 
 ```gene_resource``` contains reference sequence files and models. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_.
 
-In this tutorial, we will use the preexisting _rplB_ files and models, but we'll still go over what's in this directory. 
+In this tutorial, we will use the preexisting _rplB_ files and models, but we'll still go over what's in this directory. (Note: if you want to know more about making your own gene directory, see the bottom of this tutorial). 
 
 Let's navigate to the input data for our gene of interest _rplB_. 
 
