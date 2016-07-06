@@ -116,17 +116,7 @@ Let's navigate to the ```Xander_assembler``` directory, make a new directory in 
 ```
 cd /home/ubuntu/tools/RDPTools/Xander_assembler
 mkdir rplB_demo
-cp /home/ubuntu/demo/data/demo_reads.fa /home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
 ```
-
-Check that the file was moved to the right location. 
-
-```
-cd ~/tools/RDPTools/Xander_assembler/rplB_demo
-ls
-```
-
-You should see the demo_reads.fa file there. 
 
 Now we're ready to adjust paramters for analysis!
 
@@ -141,18 +131,24 @@ cp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/run_xander_skel.sh /home/ubu
 
 We need to change ```xander_setenv.sh``` to reflect our directories and gene of interest. This is also where we can adjust Xander parameters. First let's think about our parameter options. 
 
-#####Analysis Parameters
-* __SEQFILE__ -- Absolute path to the sequence files. Can use wildcards to point to multiple files (fasta, fataq or gz format)
-* __genes__ -- Genes to assemble (supported out of the box: rplB, nirK, nirS, nifH, nosZ, amoA)
-* __SAMPLE SHORTNAME__ -- a short name for your sample, prefix of contig IDs (needed when pool contigs from multiple samples)
+#####File locations
+* __SEQFILE__ -- Absolute path to your sequence file(s). Can use wildcards to point to multiple files (fasta, fataq or gz format)
+* __WORKDIR__ --Absolute path to where you want to include your output files. In our case, this is rplB_demo
+* __REFDIR__--Absolute path to Xander_assembler directory
+* __JARDIR__--Absolute path to RDPTools 
+* __SAMPLE SHORTNAME__ -- a short name for your sample, prefix of final files and contig IDs (needed when pool contigs from multiple samples)
 
-#####DBG Parameters
-* __MAX JVM HEAP__ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE below)
-* __K SIZE__ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63)
-* __FILTER SIZE__ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. Multiply by 2 if you want a count 2 bloom filter. Increase filter size if false positive rate >1%. 
-* __MIN COUNT__=1 -- minimum kmer occurrence in SEQFILE to be included in the final bloom filter
+#####Input data parameters
+* __K SIZE__ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63). Higher numbers yield more stringent results
+* __FILTER SIZE__ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. Multiply by 2 if you want a count 2 bloomfilter. Increase filter size if false positive rate >1%. 
+* * __MAX JVM HEAP__ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE); For example, if your filter size is ```36```, you can use ```100``` for this. 
+* __MIN COUNT__=1 -- Minimum kmer occurrence in SEQFILE to be included in the final bloom filter
 
-Descriptions of other parameters can be found in the RDP's [Xander README] (https://github.com/rdpstaff/Xander_assembler) and in greater detail in the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
+#####Contig Merge Parameters
+MIN_BITS=50 --Mimimum assembled contigs bit score. This gives the quality of contig you want. It is not recomended to go below 50. 
+MIN_LENGTH=150 -- Minimum assembled protein contigs. This determines how long your final contigs will be (min length+kmer length = minimum length). In general, keep this at or above 150. You may need to reduce it for very small proteins. 
+
+More parameter descriptions can be found in the RDP's [Xander README] (https://github.com/rdpstaff/Xander_assembler) and in greater detail in the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
 
 
 Now that we understand the paramters a bit more, lets edit our environment. 
@@ -167,7 +163,7 @@ Directories must match the absolute path that we are using, and we need to name 
 Delete lines 14-19 and paste in the following.
 
 ```
-SEQFILE=/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo/demo_reads.fa
+SEQFILE=/home/ubuntu/demo/data/demo_reads.fa
 WORKDIR=/home/ubuntu/tools/RDPTools/Xander_assembler/rplB_demo
 REF_DIR=/home/ubuntu/tools/RDPTools/Xander_assembler
 JAR_DIR=/home/ubuntu/tools/RDPTools
@@ -175,9 +171,9 @@ UCHIME=/home/ubuntu/tools/third_party_tools/uchime4.2.40_i86linux32
 HMMALIGN=/usr/local/bin/hmmalign
 ```
 
-Line 22: replace ```test``` with ```demo```.
+Line 22: replace ```test``` with ```demo```. 
 
-Line 26: select kmer size. For this experiment, we will use ```45```, but numbers divisible by three between 45 and 63 are permissible. Higher numbers will yield more stringent results. 
+Line 26: select kmer size. For this experiment, we will use ```45```.
 
 Line 29: choose minimum kmer abundance. we will set this to ```1```. 
 
@@ -198,10 +194,9 @@ To run Xander, we use one simple command.
 ./run_xander_skel.sh xander_setenv.sh "build find search" "rplB"
 ```
 
-This should take about 15-20 minutes to run with this dataset. It will take much longer (a couple of hours) with larger datasets.  
+This should take about 15-20 minutes to run with this dataset. It will take much longer (hours) with larger datasets.  
 
 Note: if you wanted to run multiple genes at once, you would simply list them in quotations as done below. 
-
 ```
 ./run_xander_skel.sh xander_setenv.sh “build find search” “rplB nirK nirS”
 ```
@@ -226,7 +221,7 @@ Here you will find the following output files:
 
 * ```demo_rplB_k45_final_nucl.fasta```: Quality filtered nucleotide sequences (representative) 
 * ```demo_rplB_k45_final_prot.fasta```: Quality filtered protein sequences and abundance (number of contigs)
-* ```demo_rplB_k45_final_prot_aligned.fasta```: Aligned protein sequences
+* ```demo_rplB_k45_final_prot_aligned.fasta```: Aligned protein sequences and abundance (number of contigs)
 * ```demo_rplB_k45_Taxonabund.txt```: taxonomic abundance adjusted by coverage (```coverage.txt```), grouped by lineage (phylum/class)
 * ```demo_rplB_k45_Framebot.txt```: Alignment of your contig with nearest reference sequence and % identity
 
