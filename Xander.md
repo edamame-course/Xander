@@ -68,7 +68,7 @@ Select instance type: General purpose, m3.large, 7.5G
 
 ###2 Prepare gene reference
 
-The Xander assembler, which is included in the RDPTools, can be accessed and downloaded from the [RDP staff GiHhub] (https://github.com/rdpstaff/RDPTools). Since this is already included in the AMI,  we can skip this download in the tutorial and navigate to the Xander assembler directory.
+The Xander assembler, which is included in the RDPTools, can be accessed and downloaded from the [RDP staff GitHhub] (https://github.com/rdpstaff/RDPTools). Since this is already included in the AMI,  we can skip this download in the tutorial and navigate to the Xander assembler directory.
 
 ```
 cd /home/ubuntu/tools/RDPTools/Xander_assembler
