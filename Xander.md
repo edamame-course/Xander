@@ -1,6 +1,6 @@
 #Xander
 
-Authored by Taylor Dunivin for EDAMAME2016 based on a previous tutorial by Qiong Wang for EDAMAME2015 
+Authored by Taylor Dunivin for EDAMAME2016 based on a [previous tutorial] (https://github.com/rdpstaff/Xander_assembler) by Qiong Wang for EDAMAME2015 
 
 [EDAMAME-2016 wiki] (https://github.com/edamame-course/2016-tutorials/wiki)
 
