@@ -295,3 +295,5 @@ Remember that when running Xander on your own gene of interest, you will need to
 Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. 
 
 You need to look through existing literature/ protein databases to find high quality sequences on your own (ideally from papers with protein crystal structures) and send them to RDP to make a FunGene database.
+
+Once you have a FunGene database, you can proceed with scenario 2.
