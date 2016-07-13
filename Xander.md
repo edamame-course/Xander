@@ -173,12 +173,6 @@ UCHIME=/home/ubuntu/tools/third_party_tools/uchime4.2.40_i86linux32
 HMMALIGN=/usr/local/bin/hmmalign
 ```
 
-Line 22: replace ```test``` with ```demo```. 
-
-Line 26: select kmer size. For this experiment, we will use ```45```.
-
-Line 29: choose minimum kmer abundance. we will set this to ```1```. 
-
 Save changes to this file and exit, and remember that you can adjust other parameters as well. 
 
 We also need to change the security of this file so that we can excecute it. 
