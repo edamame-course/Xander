@@ -51,7 +51,7 @@ As you can see, Xander will require several inputs. Our metagenomic data will be
   
 Overall, running Xander has three steps: _Build_, _Find_, and _Search_
 
-1. __Build__: Make a Bloom filter (one per sequence sample) with kmers of specified length. A bloom filter helps reduce memory usage. See these papers for more information on bloom filters [1] (http://dl.acm.org/citation.cfm?doid=362686.362692) [2] (http://www.sciencedirect.com/science/article/pii/0020019094000328). 
+1. __Build__: Make a de Bruijn graph and Bloom filter (one per sequence sample) with kmers of specified length. A bloom filter helps reduce memory usage. See these papers for more information on bloom filters [1] (http://dl.acm.org/citation.cfm?doid=362686.362692) [2] (http://www.sciencedirect.com/science/article/pii/0020019094000328). 
 2. __Find__: Find starting kmers for the genes using aligned reference sequences (has multithread option that allows you to find starting kmers for multiple genes at once). 
 3. __Search__: Assemble contigs for your gene(s) of interest
 
