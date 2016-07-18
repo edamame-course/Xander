@@ -44,7 +44,7 @@ Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenom
 The following figure is from the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6) and is a good overview of how a gene-targeted metagenome assembly works. 
 ![Structure](https://github.com/edamame-course/Xander/blob/master/Xander_structure.png)
 
-As you can see, Xander will require several inputs. Our metagenomic data will be the input for the de Bruijn graph assembly, but we will also need gene references to make the HMM. There are three ways to go about setting up a gene reference. 
+As you can see, Xander will require several inputs. Our metagenomic data will be the input for the de Bruijn graph assembly (a traditional assembly method), but we will also need gene references to make the HMM. There are three ways to go about setting up a gene reference. 
   1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. *In this tutorial we will use _rplB_ and do not need to prepare our gene reference.*
   2. Your gene of interest is on the RDP's FunGene database. This requires a bit of work and biological insight. See bottom of this page for instructions. 
   3. Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. See bottom of this page for instructions. 
