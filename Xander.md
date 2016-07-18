@@ -147,8 +147,8 @@ We need to change ```xander_setenv.sh``` to reflect our directories and gene of 
 * __MIN COUNT__=1 -- Minimum kmer occurrence in SEQFILE to be included in the final bloom filter
 
 #####Contig Merge Parameters
-MIN_BITS=50 --Mimimum assembled contigs bit score. This gives the quality of contig you want. It is not recomended to go below 50. 
-MIN_LENGTH=150 -- Minimum assembled protein contigs. This determines how long your final contigs will be (min length+kmer length = minimum length). In general, keep this at or above 150. You may need to reduce it for very small proteins. 
+* MIN_BITS=50 --Mimimum assembled contigs bit score. This gives the quality of contig you want. It is not recomended to go below 50. 
+* MIN_LENGTH=150 -- Minimum assembled protein contigs. This determines how long your final contigs will be (min length+kmer length = minimum length). In general, keep this at or above 150. You may need to reduce it for very small proteins. 
 
 More parameter descriptions can be found in the RDP's [Xander README] (https://github.com/rdpstaff/Xander_assembler) and in greater detail in the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
 
