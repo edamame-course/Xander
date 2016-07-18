@@ -218,8 +218,8 @@ Here you will find the final output files:
 * ```demo_rplB_k45_final_nucl.fasta```: Quality filtered nucleotide sequences (representative) 
 * ```demo_rplB_k45_final_prot.fasta```: Quality filtered protein sequences (representative) and raw abundance (number of contigs)
 * ```demo_rplB_k45_final_prot_aligned.fasta```: Aligned protein sequences and raw abundance (number of contigs)
-* ```demo_rplB_k45_Taxonabund.txt```: taxonomic abundance adjusted by coverage (```coverage.txt```), grouped by lineage (phylum/class)
-* ```demo_rplB_k45_Framebot.txt```: Alignment of your contig with nearest reference sequence and % amino acid identity
+* ```demo_rplB_k45_taxonabund.txt```: taxonomic abundance adjusted by coverage (```coverage.txt```), grouped by lineage (phylum/class)
+* ```demo_rplB_k45_framebot.txt```: Alignment of your contig with nearest reference sequence and % amino acid identity; looks like BLAST results
 * ```complete.clust```: Shows how many contigs you have with different distance cutoffs. (You'll have more contigs with lower distance cutoffs)
 
 More output file descriptions can be found in the RDP's [Xander README] (https://github.com/rdpstaff/Xander_assembler) and in greater detail in the [Xander publication] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
