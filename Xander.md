@@ -190,7 +190,7 @@ To run Xander, we use one simple command.
 ./run_xander_skel.sh xander_setenv.sh "build find search" "rplB"
 ```
 
-This should take about 15-20 minutes to run with this dataset. It will take much longer (hours) with larger datasets.  
+This should take about 10-15 minutes to run with this dataset. It will take much longer (hours) with larger datasets.  
 
 Note: if you wanted to run multiple genes at once, you would simply list them in quotations as done below. 
 ```
