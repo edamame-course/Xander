@@ -1,4 +1,4 @@
-#Xander
+# Xander
 
 Authored by Taylor Dunivin for EDAMAME2016 based on a [previous tutorial] (https://github.com/rdpstaff/Xander_assembler) by Qiong Wang for EDAMAME2015 
 
@@ -8,10 +8,10 @@ Authored by Taylor Dunivin for EDAMAME2016 based on a [previous tutorial] (https
 EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-tutorials/blob/master/LICENSE.md). _Share, adapt, and attribute please!_
 ***
 
-##Overarching Goal  
+## Overarching Goal  
 * This tutorial will contribute towards an understanding of **microbial metagenome analysis**
 
-##Learning Objectives
+## Learning Objectives
 * Prepare gene references for assembly
 * Understand Xander assembly parameters 
 * Assemble one gene from a megatenome
@@ -19,25 +19,25 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 
 ---
 
-###Citations
+### Citations
 Wang, Q., J. A. Fish, M. Gilman, Y. Sun, C. T. Brown, J. M. Tiedje and J. R. Cole. 2015. Xander: Employing a Novel Method for Efficient Gene-Targeted Metagenomic Assembly. Microbiome. 3:32. DOI: [10.1186/s40168-015-0093-6] (http://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-015-0093-6). 
 
 Fish, J. A., B. Chai, Q. Wang, Y. Sun, C. T. Brown, J. M. Tiedje, and J. R. Cole. 2013. FunGene: the Functional Gene Pipeline and Repository. Front. Microbiol. 4: 291. DOI: [10.3389/fmicb.2013.00291] (http://www.ncbi.nlm.nih.gov/pubmed/24101916).
 
-###Required tools
+### Required tools
 * [RDPTools] (https://github.com/rdpstaff/RDPTools)
 * Python 2.7+
 * Java 2.6+
 * [HMMER 3.1] (http://hmmer.org) (If using HMMER 3.0 add --allcol to bin/run_xander_skel.sh )
 * UCHIME 
 
-###What is Xander?
+### What is Xander?
 Xander is a gene-targeted metagenome assembler. This means that it takes metagenomic data and assembles it based on your gene(s) of interest only. This can be useful if you have metagenomic data and a gene-centric study in mind. Classic approaches to metagenome assembly tend to assemble the most abundant organisms and can have more limited recovery for individual genes. This can be problematic, especially if you are interested in only a handful of specific genes. Xander avoids this problem by guiding the assembly based on your gene of interest. 
 
-###How does Xander work?
+### How does Xander work?
 Xander uses a profile hidden Markov models (HMMs) to guide assembly of metagenomic data. Check out the [wikipedia page] (https://en.wikipedia.org/wiki/Hidden_Markov_model) for more information on HMMs. In short, these are probabalistic graphs that predict protein sequences. Basically these models say how likely a specific sequence is to have come from a known sequence. Xander uses these to guide the assembly of metagenomic data, so you only end up with assembled contigs that resemble your gene of interest.
 
-###What does Xander require?
+### What does Xander require?
 1. High quality data file. Sequencing depth will greatly effect the quality of Xander results. It is important to have deep sequencing, especially for low abundance genes in order to get quality, near full length proteins. The theory of "garbage in, garbage out" also applies to Xander. Input data should already be quality filtered. 
 2. Biological insight on your gene of interest. Because Xander uses existing knowledge of your gene of interest for the assembly, it is best to run well characterized genes especially proteins with crystal structures. 
 
@@ -59,14 +59,14 @@ For more detail on these steps, check out the [Xander publication] (http://micro
 
 Now that we have a basic idea of how Xander works and what we need, let's get started!
 
-###1 Connect to Xander AMI
+### 1 Connect to Xander AMI
 For this tutorial, we will use an existing AMI that contains all the necessary tools to run Xander. Search for the AMI name "RDP-Edamame-2015" or ID "ami-e973b782"
 
 Click launch.
 
 Select instance type: General purpose, m3.large, 7.5G
 
-###2 Prepare gene reference
+### 2 Prepare gene reference
 
 The Xander assembler, which is included in the RDPTools, can be accessed and downloaded from the [RDP staff GitHhub] (https://github.com/rdpstaff/RDPTools). Since this is already included in the AMI,  we can skip this download in the tutorial and navigate to the Xander assembler directory.
 
@@ -109,7 +109,7 @@ You should now see three files (and the ```originaldata``` directory): **ref_ali
 
 Now that we understand our gene reference files, we can begin to set up the assembler. 
 
-##3 Set up environment and parameters
+## 3 Set up environment and parameters
 Since you may want to run Xander multiple times, it can be useful to make a directory for each project that includes the gene name and dataset used. We will do this now. 
 
 In our case, we will use data provided by the creators of Xander. This demo_reads file here contains a subset of reads from one of seven corn rhizosphere replicates used in the original Xander publication. This subset is enriched in reads matching rplB, nirK and nifH genes. **These paired-end reads have already been quality trimmed and merged using RDP's read assembler**.
@@ -133,20 +133,20 @@ cp /home/ubuntu/tools/RDPTools/Xander_assembler/bin/run_xander_skel.sh /home/ubu
 
 We need to change ```xander_setenv.sh``` to reflect our directories and gene of interest. This is also where we can adjust Xander parameters. First let's think about our parameter options. 
 
-#####File locations
+##### File locations
 * __SEQFILE__ -- Absolute path to your sequence file(s). Can use wildcards to point to multiple files (fasta, fataq or gz format)
 * __WORKDIR__ --Absolute path to where you want to include your output files. In our case, this is rplB_demo
 * __REFDIR__--Absolute path to Xander_assembler directory
 * __JARDIR__--Absolute path to RDPTools 
 * __SAMPLE SHORTNAME__ -- a short name for your sample, prefix of final files and contig IDs (needed when pool contigs from multiple samples)
 
-#####Input data parameters
+##### Input data parameters
 * __K SIZE__ -- K-mer size to assemble at, must be divisible by 3 (recommend 45, maximum 63). Higher numbers yield more stringent results
 * __FILTER SIZE__ -- size of the bloom filter, 2**FILTER_SIZE, 38 = 32 GB, 37 = 16 GB, 36 = 8 GB, 35 = 4 GB. Multiply by 2 if you want a count 2 bloomfilter. Increase filter size if false positive rate >1%. 
 * * __MAX JVM HEAP__ -- Maximum amount of memory DBG processes can use (must be larger than FILTER_SIZE); For example, if your filter size is ```36```, you can use ```100``` for this. 
 * __MIN COUNT__=1 -- Minimum kmer occurrence in SEQFILE to be included in the final bloom filter
 
-#####Contig Merge Parameters
+##### Contig Merge Parameters
 * MIN_BITS=50 --Mimimum assembled contigs bit score. This gives the quality of contig you want. It is not recomended to go below 50. 
 * MIN_LENGTH=150 -- Minimum assembled protein contigs. This determines how long your final contigs will be (min length+kmer length = minimum length). In general, keep this at or above 150. You may need to reduce it for very small proteins. 
 
@@ -183,7 +183,7 @@ chmod 755 xander_setenv.sh
 
 Now we are ready to roll!
 
-###4 Run Xander
+### 4 Run Xander
 To run Xander, we use one simple command.
 
 ```
@@ -197,7 +197,7 @@ Note: if you wanted to run multiple genes at once, you would simply list them in
 ./run_xander_skel.sh xander_setenv.sh “build find search” “rplB nirK nirS”
 ```
 
-###5 Analyze results
+### 5 Analyze results
 Xander has a lot of output files, so now we will go over which ones are important for your analysis. First let's check our false positive rate.
 
 ```
@@ -226,17 +226,17 @@ More output file descriptions can be found in the RDP's [Xander README] (https:/
 
 -------
 -------
-###Preparing Gene References
+### Preparing Gene References
   1. The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. 
   2. Your gene of interest is on the RDP's FunGene database. 
   3. Your gene of interest is not preconfigured or on the FunGene database. 
 
 Below, you will find instructions for each of these scenarios. 
 
-####Scenario 1: 
+#### Scenario 1: 
 The analysis pipeline is preconfigured with the _rplB_ phylogenetic marker gene, and nitrogen cycling genes including _nirK_, _nirS_, _nifH_, _nosZ_ and _amoA_. These require no work from you. See above tutorial. 
 
-####Scenario 2:
+#### Scenario 2:
  Your gene of interest is on the RDP's FunGene database. This requires a bit of work and biological insight. 
 For each individual gene of interest, ```mkdir genename```, navigate to this gene directory, and ```mkdir originaldata```. 
 
@@ -291,7 +291,7 @@ You should now see three new files: **ref_aligned.faa**, **for_enone.hmm**, and 
 
 Remember that when running Xander on your own gene of interest, you will need to manually check ```ref_aligned.faa``` for any poorly aligned sequences. This can be done using Jalview or another alignment viewing tool. 
 
-####Scenario 3: 
+#### Scenario 3: 
 Your gene of interest is not preconfigured or on the FunGene database. This requires a bit of research, work, and biological insight. 
 
 You need to look through existing literature/ protein databases to find high quality sequences on your own (ideally from papers with protein crystal structures) and send them to RDP to make a FunGene database.
